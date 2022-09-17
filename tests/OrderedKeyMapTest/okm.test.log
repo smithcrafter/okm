@@ -1,0 +1,62 @@
+Intel(R) Core(TM) i5-10210U CPU @ 1.60GHz, gcc 11.2.0, release build
+
+Count: 10000000 random count 1000000 KEY: j VALUE: 9TestValue
+---INSERT---
+qt_map   insert count= 10000000 time: 3533807715 ns
+std_umap insert count= 10000000 time: 1103047528 ns
+std_map  insert count= 10000000 time: 3967309382 ns
+s_okm_0  insert count= 10000000 time: 148840320 ns
+s_okm_1  insert count= 10000000 time: 134410566 ns
+---CIRCLE FOR BY ITERATOR---
+qt_map   for iterator sum= 10736401936287473 time: 248788732 ns
+std_umap for iterator sum= 10736401936287473 time: 160940866 ns
+std_map  for iterator sum= 10736401936287473 time: 402163256 ns
+s_okm_0  for iterator sum= 10736401936287473 time: 14170614 ns
+s_okm_1  for iterator sum= 10736401936287473 time: 14511083 ns
+---CIRCLE FOR BY ORDERED TKEYS---
+qt_map   operator[] order_pass sum 10736401936287473 time: 1845448962 ns
+std_umap operator[] order_pass sum 10736401936287473 time: 283972921 ns
+std_map  operator[] order_pass sum 10736401936287473 time: 2427366047 ns
+s_okm_0  operator[] order_pass sum 10736401936287473 time: 542194539 ns
+s_okm_1  operator[] order_pass sum 10736401936287473 time: 822577958 ns
+--- FIND BY ORDERED TKEYS---
+qt_map   tkeys find sum 10736401936287473 time: 1928096291 ns
+std_umap tkeys find sum 10736401936287473 time: 213754364 ns
+std_map  tkeys find sum 10736401936287473 time: 2072641786 ns
+s_okm_0  tkeys find sum 10736401936287473 time: 502384840 ns
+s_okm_1  tkeys find sum 10736401936287473 time: 841109515 ns
+s_okm_0  tkeys find sum 10736401936287473 time: 498312440 ns Alt
+s_okm_1  tkeys find sum 10736401936287473 time: 763944686 ns Alt
+---FIND BY RANDOM KEYS---
+qt_map   key randoms find sum 1073847289254573 time: 1725880898 ns
+std_umap key randoms find sum 1073847289254573 time: 122475701 ns
+std_map  key randoms find sum 1073847289254573 time: 1782389444 ns
+s_okm_0  key randoms find sum 1073847289254573 time: 436070732 ns
+s_okm_1  key randoms find sum 1073847289254573 time: 564647113 ns
+s_okm_0  key randoms find sum 1073847289254573 time: 429273587 ns Alt
+s_okm_1  key randoms find sum 1073847289254573 time: 543413930 ns Alt
+---OPERATOR[] BY RANDOM KEYS---
+qt_map   operator[] random_pass sum 1073847289254573 time: 1736433999 ns
+std_umap operator[] random_pass sum 1073847289254573 time: 167013239 ns
+std_map  operator[] random_pass sum 1073847289254573 time: 1801176958 ns
+s_okm_0  operator[] random_pass sum 1073847289254573 time: 459393906 ns
+s_okm_1  operator[] random_pass sum 1073847289254573 time: 558909809 ns
+---CONTAINS BY BY RANDOM KEYS---
+qt_map   key randoms contains sum 1000000 time: 1739128773 ns
+std_umap key randoms contains sum 1000000 time: 119999905 ns
+std_map  key randoms contains sum 1000000 time: 1786305024 ns
+s_okm_0  key randoms contains sum 1000000 time: 437181904 ns
+s_okm_1  key randoms contains sum 1000000 time: 565743860 ns
+---LOWERBOUND BY RANDOM KEYS---
+qt_map   key randoms lowerBound sum 1073847289254573 time: 1746737523 ns
+std_map  key randoms lowerBound sum 1073847289254573 time: 1777473365 ns
+s_okm_0  key randoms lowerBound sum 1073847289254573 time: 431816576 ns
+s_okm_1  key randoms lowerBound sum 1073847289254573 time: 544915660 ns
+---UPPERBOUND BY RANDOM KEYS---
+lmap key randoms upperBound over lowerBound sum 1074334975464366 time: 428076037 ns
+qt_map   key randoms upperBound sum 1074334975464415 time: 1652083350 ns
+std_map  key randoms upperBound sum 1214803948318350 time: 1761704739 ns
+s_okm_0  key randoms upperBound sum 1074334975464366 time: 438650827 ns
+s_okm_1  key randoms upperBound sum 1074334975464366 time: 551470637 ns
+s_okm_0  key randoms upperBound sum 1074334975464366 time: 435745679 ns Alt
+s_okm_1  key randoms upperBound sum 1074334975464366 time: 542751602 ns Alt
