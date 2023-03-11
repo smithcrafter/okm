@@ -1,6 +1,6 @@
 /*
  * Licensed under the MIT License <http://opensource.org/licenses/MIT>.
- * Copyright (C) 2016-2022 Vladimir Kuznetsov <smithcoder@yandex.ru> https://smithcoder.ru
+ * Copyright (C) 2016-2023 Vladimir Kuznetsov <smithcoder@yandex.ru> https://smithcoder.ru
  */
 
 #include <QElapsedTimer>
