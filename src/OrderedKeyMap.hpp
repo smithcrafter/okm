@@ -1,6 +1,6 @@
 /*
  * Licensed under the MIT License <http://opensource.org/licenses/MIT>.
- * Copyright (C) 2016-2022 Vladimir Kuznetsov <smithcoder@yandex.ru> https://smithcoder.ru
+ * Copyright (C) 2016-2023 Vladimir Kuznetsov <smithcoder@yandex.ru> https://smithcoder.ru
  */
 
 #pragma once
@@ -214,9 +214,8 @@ typename OrderedKeyMap<KTYPE, TYPE, FINDALGORITHM>::iterator OrderedKeyMap<KTYPE
 		if (int((count_+1)*sizeof(Pair)) > dataSize_)
 			realoc(dataSize_);
 		new ((Pair*)((char*)data_+count_*sizeof(Pair))) Pair(key, std::move(value));
-		count_++;
 		lastKey_ = key;
-		return iterator(this, count_-1);
+		return iterator(this, count_++);
 	}
 	auto it = lowerBound(key);
 	if (it.key() == key)
@@ -383,11 +382,10 @@ enum class SearchType
 };
 
 template <typename KTYPE, typename TYPE, FindAlgorithm FINDALGORITHM = FindAlgorithm::BinarySeparation>
-typename OrderedKeyMap<KTYPE, TYPE, FindAlgorithm::BinarySeparation>::iterator internalSearch(const OrderedKeyMap<KTYPE, TYPE, FindAlgorithm::BinarySeparation>& container,
-																 KTYPE key, SearchType stype)
+static inline typename OrderedKeyMap<KTYPE, TYPE, FindAlgorithm::BinarySeparation>::iterator internalSearch(
+		const OrderedKeyMap<KTYPE, TYPE, FindAlgorithm::BinarySeparation>& container, KTYPE key, SearchType stype)
 {
-	int begin = 0;
-	int end = container.count()-1;
+	int begin = 0, end = container.count()-1;
 	while (begin + 1 < end)
 	{
 		auto pos = (end+begin)/2;
@@ -406,11 +404,10 @@ typename OrderedKeyMap<KTYPE, TYPE, FindAlgorithm::BinarySeparation>::iterator i
 }
 
 template <typename KTYPE, typename TYPE, FindAlgorithm FINDALGORITHM = FindAlgorithm::RelativePrediction>
-typename OrderedKeyMap<KTYPE, TYPE, FindAlgorithm::RelativePrediction>::iterator internalSearch(const OrderedKeyMap<KTYPE, TYPE, FindAlgorithm::RelativePrediction>& container,
-																 KTYPE key, SearchType stype)
+static inline typename OrderedKeyMap<KTYPE, TYPE, FindAlgorithm::RelativePrediction>::iterator internalSearch(
+		const OrderedKeyMap<KTYPE, TYPE, FindAlgorithm::RelativePrediction>& container, KTYPE key, SearchType stype)
 {
-	int begin = 0;
-	int end = container.count()-1;
+	int begin = 0,  end = container.count()-1;
 	KTYPE beginKey = container.firstKey(), endKey = container.lastKey();
 	while (begin + 1 < end)
 	{
