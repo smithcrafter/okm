@@ -7,6 +7,7 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QList>
+#include <QHash>
 #include <map>
 #include <unordered_map>
 #include <smitto/okm.h>
@@ -14,6 +15,8 @@
 struct TestValue
 {
 	quint64 val;
+	quint64 val2;
+	quint64 val3;
 	TestValue() = default;
 	TestValue(quint32 pval) : val(pval) {}
 	TestValue& operator +=(const TestValue& o) {val+=o.val; return *this;}
@@ -25,7 +28,7 @@ auto maxRandKeys = 1'000'000;
 using KeyType = quint32;
 using ValueType = TestValue;
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
 	Q_UNUSED(argc);
 	Q_UNUSED(argv)
@@ -34,6 +37,7 @@ int main(int argc, char *argv[])
 	Smitto::OrderedKeyMap<KeyType, ValueType> testmap;
 
 	QMap<KeyType, ValueType> qt_map;
+	QHash<KeyType, ValueType> qt_hash;
 	std::unordered_map<KeyType, ValueType> std_umap;
 	std::map<KeyType, ValueType> std_map;
 	Smitto::OrderedKeyMap<KeyType, ValueType, Smitto::FindAlgorithm::BinarySeparation> s_okm_0;
@@ -42,9 +46,16 @@ int main(int argc, char *argv[])
 	auto end = QDateTime(QDate::currentDate().addDays(100*365), QTime(0,0,0)).toSecsSinceEpoch();
 	for (qint64 i = QDateTime(QDate::currentDate(), QTime(0,0,0)).toSecsSinceEpoch(); i < end && testmap.size() < maxCount; i+=60)
 		if (quint32 tod = i%(3600*24))
-			if (tod > 7*3600 && tod < 20*3600)
+			if (tod >= 7*3600 && tod <= 23*3600)
 				testmap.insert(i, std::rand());
 	qDebug()<<"Count:"<<testmap.size()<<"random count"<<maxRandKeys<<"KEY:"<<typeid(KeyType).name()<<"VALUE:"<<typeid(ValueType).name();
+
+	auto tkeys = testmap.keys();
+	QVector<KeyType> randoms;
+	randoms.reserve(maxRandKeys);
+	for (int i = 0; i < maxRandKeys; i++)
+		randoms.append(tkeys[std::rand()%testmap.size()]);
+
 	QElapsedTimer timer;
 
 	qDebug()<<"---INSERT---";
@@ -53,6 +64,11 @@ int main(int argc, char *argv[])
 	for (auto it = testmap.constBegin(); it != testmap.constEnd(); ++it)
 		qt_map.insert(it.key(), it.value());
 	qDebug()<<"qt_map   insert count="<<qt_map.size()<<"time:"<<timer.nsecsElapsed()<<"ns";
+
+	timer.start();
+	for (auto it = testmap.constBegin(); it != testmap.constEnd(); ++it)
+		qt_hash.insert(it.key(), it.value());
+	qDebug()<<"qt_hash  insert count="<<qt_hash.size()<<"time:"<<timer.nsecsElapsed()<<"ns";
 
 	timer.restart();
 	for (auto it = testmap.constBegin(); it != testmap.constEnd(); ++it)
@@ -74,12 +90,19 @@ int main(int argc, char *argv[])
 		s_okm_1.insert(it.key(), it.value());
 	qDebug()<<"s_okm_1  insert count="<<s_okm_1.count()<<"time:"<<timer.nsecsElapsed()<<"ns";
 
-/// --------------------------------------------------------------------
+/// ------------------------------------------------------------------------------------------------
+
 	qDebug()<<"---CIRCLE FOR BY ITERATOR---";
+
 	ValueType sum = 0; timer.restart();
 	for (auto it = qt_map.constBegin(); it != qt_map.constEnd(); ++it)
 		sum+= it.value();
 	qDebug()<<"qt_map   for iterator sum="<<sum<<"time:"<<timer.nsecsElapsed()<<"ns";
+
+	timer.restart(); sum = 0;
+	for (auto it = qt_hash.constBegin(); it != qt_hash.constEnd(); ++it)
+		sum+= it.value();
+	qDebug()<<"qt_hash  for iterator sum="<<sum<<"time:"<<timer.nsecsElapsed()<<"ns";
 
 	timer.restart(); sum = 0;
 	for (auto it = std_umap.begin(); it != std_umap.end(); ++it)
@@ -101,20 +124,19 @@ int main(int argc, char *argv[])
 		sum += it.value();
 	qDebug()<<"s_okm_1  for iterator sum="<<sum<<"time:"<<timer.nsecsElapsed()<<"ns";
 
+/// ------------------------------------------------------------------------------------------------
 
-	auto tkeys = testmap.keys();
-	QVector<KeyType> randoms;
-	randoms.reserve(maxRandKeys);
-	for (int i = 0; i < maxRandKeys; i++)
-		randoms.append(tkeys[std::rand()%testmap.size()]);
-
-/// --------------------------------------------------------------------
 	qDebug()<<"---CIRCLE FOR BY ORDERED TKEYS---";
 
 	sum = 0; timer.restart();
 	for(auto tkey : tkeys)
 		sum += qt_map[tkey];
 	qDebug()<<"qt_map   operator[] order_pass sum"<<sum<<"time:"<<timer.nsecsElapsed()<<"ns";
+
+	sum = 0; timer.restart();
+	for(auto tkey : tkeys)
+		sum += qt_hash[tkey];
+	qDebug()<<"qt_hash  operator[] order_pass sum"<<sum<<"time:"<<timer.nsecsElapsed()<<"ns";
 
 	sum = 0; timer.restart();
 	for(auto tkey : tkeys)
@@ -137,12 +159,18 @@ int main(int argc, char *argv[])
 	qDebug()<<"s_okm_1  operator[] order_pass sum"<<sum<<"time:"<<timer.nsecsElapsed()<<"ns";
 
 
-/// --------------------------------------------------------------------
+/// ------------------------------------------------------------------------------------------------
+
 	qDebug()<<"--- FIND BY ORDERED TKEYS---";
 	sum = 0; timer.restart();
 	for(auto tkey : tkeys)
 		sum += qt_map.find(tkey).value();
 	qDebug()<<"qt_map   tkeys find sum"<<sum<<"time:"<<timer.nsecsElapsed()<<"ns";
+
+	sum = 0; timer.restart();
+	for(auto tkey : tkeys)
+		sum += qt_hash.find(tkey).value();
+	qDebug()<<"qt_hash  tkeys find sum"<<sum<<"time:"<<timer.nsecsElapsed()<<"ns";
 
 	sum = 0; timer.restart();
 	for(auto tkey : tkeys)
@@ -175,12 +203,18 @@ int main(int argc, char *argv[])
 	qDebug()<<"s_okm_1  tkeys find sum"<<sum<<"time:"<<timer.nsecsElapsed()<<"ns Alt";
 
 
-/// --------------------------------------------------------------------
+/// ------------------------------------------------------------------------------------------------
+
 	qDebug()<<"---FIND BY RANDOM KEYS---";
 	sum = 0; timer.restart();
 	for(auto tkey : randoms)
 		sum += qt_map.find(tkey).value();
 	qDebug()<<"qt_map   key randoms find sum"<<sum<<"time:"<<timer.nsecsElapsed()<<"ns";
+
+	sum = 0; timer.restart();
+	for(auto tkey : randoms)
+		sum += qt_hash.find(tkey).value();
+	qDebug()<<"qt_hash  key randoms find sum"<<sum<<"time:"<<timer.nsecsElapsed()<<"ns";
 
 	sum = 0; timer.restart();
 	for(auto tkey : randoms)
@@ -222,6 +256,11 @@ int main(int argc, char *argv[])
 
 	sum = 0;timer.restart();
 	for(auto tkey : randoms)
+		sum += qt_hash[tkey];
+	qDebug()<<"qt_hash  operator[] random_pass sum"<<sum<<"time:"<<timer.nsecsElapsed()<<"ns";
+
+	sum = 0;timer.restart();
+	for(auto tkey : randoms)
 		sum += std_umap[tkey];
 	qDebug()<<"std_umap operator[] random_pass sum"<<sum<<"time:"<<timer.nsecsElapsed()<<"ns";
 
@@ -241,12 +280,18 @@ int main(int argc, char *argv[])
 	qDebug()<<"s_okm_1  operator[] random_pass sum"<<sum<<"time:"<<timer.nsecsElapsed()<<"ns";
 
 
-/// --------------------------------------------------------------------
+/// ------------------------------------------------------------------------------------------------
+
 	qDebug()<<"---CONTAINS BY BY RANDOM KEYS---";
 	sum = 0; timer.restart();
 	for(auto tkey : randoms)
 		sum += qt_map.contains(tkey);
 	qDebug()<<"qt_map   key randoms contains sum"<<sum<<"time:"<<timer.nsecsElapsed()<<"ns";
+
+	sum = 0;timer.restart();
+	for(auto tkey : randoms)
+		sum += qt_hash.contains(tkey);
+	qDebug()<<"qt_hash  key randoms contains sum"<<sum<<"time:"<<timer.nsecsElapsed()<<"ns";
 
 	sum = 0;timer.restart();
 	for(auto tkey : randoms)
@@ -275,7 +320,8 @@ int main(int argc, char *argv[])
 			qDebug()<<"err contains";
 	}
 
-/// --------------------------------------------------------------------
+/// ------------------------------------------------------------------------------------------------
+
 	qDebug()<<"---LOWERBOUND BY RANDOM KEYS---";
 	sum = 0; timer.restart();
 	for(auto tkey : randoms)
@@ -298,7 +344,8 @@ int main(int argc, char *argv[])
 	qDebug()<<"s_okm_1  key randoms lowerBound sum"<<sum<<"time:"<<timer.nsecsElapsed()<<"ns";
 
 
-/// --------------------------------------------------------------------
+/// ------------------------------------------------------------------------------------------------
+
 	qDebug()<<"---UPPERBOUND BY RANDOM KEYS---";
 
 	sum = 0;timer.restart();
